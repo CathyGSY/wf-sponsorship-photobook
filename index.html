@@ -527,6 +527,30 @@
     });
   }
 
+  function eventDateKey(ev) {
+    const s = ev.date.replace(/&ndash;/g, "-").replace(/&mdash;/g, "-");
+    const months = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, oct:9, nov:10, dec:11 };
+    let m = s.match(/(\d{1,2})\s+([A-Za-z]{3,9})\s+(\d{4})/);
+    if (m && months[m[2].slice(0,3).toLowerCase()] !== undefined) {
+      return new Date(parseInt(m[3]), months[m[2].slice(0,3).toLowerCase()], parseInt(m[1])).getTime();
+    }
+    m = s.match(/(\d{4})-(\d{2})\b/);
+    if (m) {
+      return new Date(parseInt(m[1].slice(0,2) + m[2]), 0, 1).getTime();
+    }
+    const monthTokens = [...s.matchAll(/([A-Za-z]{3,9})/g)].map(x => x[1].slice(0,3).toLowerCase()).filter(x => months[x] !== undefined);
+    const yearTokens = [...s.matchAll(/(\d{4})/g)].map(x => parseInt(x[1]));
+    if (monthTokens.length && yearTokens.length) {
+      return new Date(yearTokens[yearTokens.length-1], months[monthTokens[monthTokens.length-1]], 1).getTime();
+    }
+    if (yearTokens.length) {
+      return new Date(yearTokens[yearTokens.length-1], 0, 1).getTime();
+    }
+    return 0;
+  }
+  PART1.sort((a, b) => eventDateKey(b) - eventDateKey(a));
+  PART2.sort((a, b) => eventDateKey(b) - eventDateKey(a));
+
   renderGrid("grid-1", PART1);
   renderGrid("grid-2", PART2);
 
